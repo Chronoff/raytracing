@@ -1,13 +1,14 @@
 #ifndef HITTABLE_H
 #define HITTABLE_H
 
-#include "ray.h"
+class material;
 
 class hitRecord
 {
 	public:
 		point3 p;
 		vec3 normal;
+		shared_ptr<material> mat;
 		double t;
 		bool frontFace;
 
@@ -26,7 +27,7 @@ class hittable
 	public:
 		virtual ~hittable() = default;
 
-		virtual bool hit(const ray& r, double rayTmin, double rayTmax, hitRecord& rec) const = 0;
+		virtual bool hit(const ray& r, interval rayT, hitRecord& rec) const = 0;
 };
 
 #endif

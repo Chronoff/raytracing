@@ -1,9 +1,6 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include <cmath>
-#include <iostream>
-
 class vec3
 {
 	public:
@@ -41,7 +38,7 @@ class vec3
 			return *this *= 1/t;
 		}
 		
-		double lenght() const
+		double length() const
 		{
 			return std::sqrt(lenghtSquared());
 		}
@@ -50,6 +47,23 @@ class vec3
 		{
 			return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
 		}
+
+		bool nearZero() const
+		{
+			auto s = 1e-8;
+			return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) && (std::fabs(e[2]) < s);
+		}
+
+		static vec3 random()
+		{
+			return vec3(randomDouble(), randomDouble(), randomDouble());
+		}
+
+		static vec3 random(double min, double max)
+		{
+			return vec3(randomDouble(min,max), randomDouble(min,max), randomDouble(min,max));
+		}
+
 };
 
 using point3 = vec3;
@@ -105,7 +119,41 @@ inline vec3 cross(const vec3& u, const vec3& v)
 
 inline vec3 unitVector(const vec3& v)
 {
-	return v / v.lenght();
+	return v / v.length();
 }
+
+inline vec3 randomUnitVector()
+{
+	while(true)
+	{
+		auto p = vec3::random(-1,1);
+		auto lensq = p.lenghtSquared();
+		if(1e-160 < lensq && lensq <= 1)
+		{
+			return p / sqrt(lensq);
+		}
+	}
+}
+
+inline vec3 randomOnHemisphere(const vec3& normal)
+{
+	vec3 onUnitSphere = randomUnitVector();
+	if(dot(onUnitSphere, normal) > 0.0) return onUnitSphere;
+	else return -onUnitSphere;
+}
+
+inline vec3 reflect(const vec3& v, const vec3& n)
+{
+	return v - 2*dot(v,n)*n;
+}
+
+inline vec3 refract(const vec3& uv, const vec3& n, double etaiOverEtat)
+{
+	auto cosTheta = std::fmin(dot(-uv, n), 1.0);
+	vec3 rOutPerp = etaiOverEtat * (uv + cosTheta*n);
+	vec3 rOutParallel = -std::sqrt(std::fabs(1.0 - rOutPerp.lenghtSquared())) * n;
+	return rOutParallel + rOutPerp;
+}
+
 
 #endif
